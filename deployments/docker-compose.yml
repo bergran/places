@@ -1,0 +1,44 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+  db:
+    container_name: places-db
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: places
+      POSTGRES_USER: places
+      POSTGRES_DB: places
+    networks:
+      - places
+    ports:
+      - 5432:5432
+
+  places:
+    container_name: places-app
+    image: python:3.7.3-stretch
+    working_dir: /code
+    environment:
+      DATABASE: places
+      USERNAME: places
+      PASSWORD: places
+      HOST: db
+      RESOURCE_ORIGIN_DUMMY_DATA: http://gateway:8000
+      RESOURCE_NUMBER_ELEMENTS: 400
+      PYTHONPATH: /code
+    ports:
+      - 8081:8000
+    networks:
+      - microservices
+      - places
+    depends_on:
+      - db
+    volumes:
+      - ../:/code
+    command: sh deployments/run.sh
+
+networks:
+  microservices:
+    external:
+      name: microservice
+  places:
